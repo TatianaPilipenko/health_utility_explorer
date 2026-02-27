@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health utility explorer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 id="app-title">Health utility explorer</h1>
+      <p id="app-subtitle">Compare your profile to population data and see how factors affect a utility-style score and quality-adjusted years.</p>
+      <p class="run-hint">Run in terminal: <code>python server.py</code> — then open <strong>http://127.0.0.1:5000</strong> in this browser.</p>
+    </header>
+
+    <main>
+      <form id="qaly-form" class="qaly-form">
+        <section class="form-section" aria-labelledby="sec-demographics">
+          <h2 id="sec-demographics">Demographics</h2>
+          <div class="field">
+            <label for="gender">Birth gender</label>
+            <select id="gender" name="gender" required>
+              <option value="Female" selected>Female</option>
+              <option value="Male">Male</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="age_at_screening">Age (years)</label>
+            <input type="number" id="age_at_screening" name="age_at_screening" min="18" max="120" value="32" required>
+          </div>
+          <div class="field">
+            <label for="education_level">Highest education</label>
+            <select id="education_level" name="education_level">
+              <option value="Less than 9th grade">Less than 9th grade</option>
+              <option value="9-11th grade (Includes 12th grade with no diploma)">9-11th grade</option>
+              <option value="High school graduate/GED or equivalent">High school graduate / GED</option>
+              <option value="Some college or AA degree">Some college or AA degree</option>
+              <option value="College graduate or above" selected>College graduate or above</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="sec-units">
+          <h2 id="sec-units">Units</h2>
+          <div class="field">
+            <label for="unit_choice">Lab unit</label>
+            <select id="unit_choice" name="unit_choice">
+              <option value="mmol" selected>mmol</option>
+              <option value="mg">mg</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="sec-labs">
+          <h2 id="sec-labs">Labs &amp; body measures</h2>
+          <div class="field">
+            <label for="hdl_cholesterol">HDL cholesterol</label>
+            <input type="number" id="hdl_cholesterol" name="hdl_cholesterol" step="any" value="1.81" placeholder="e.g. 1.81">
+          </div>
+          <div class="field">
+            <label for="total_cholesterol">Total cholesterol</label>
+            <input type="number" id="total_cholesterol" name="total_cholesterol" step="any" value="4.91">
+          </div>
+          <div class="field">
+            <label for="insulin">Insulin</label>
+            <input type="number" id="insulin" name="insulin" step="any" value="3.3">
+          </div>
+          <div class="field">
+            <label for="fasting_glucose">Fasting glucose</label>
+            <input type="number" id="fasting_glucose" name="fasting_glucose" step="any" value="2.8">
+          </div>
+          <div class="field">
+            <label for="bmi">BMI (kg/m²)</label>
+            <input type="number" id="bmi" name="bmi" step="any" min="10" max="80" value="31">
+          </div>
+          <div class="field">
+            <label for="waist_circumference_cm">Waist circumference (cm)</label>
+            <input type="number" id="waist_circumference_cm" name="waist_circumference_cm" min="40" max="200" value="65">
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="sec-history">
+          <h2 id="sec-history">Medical history</h2>
+          <div class="field">
+            <label for="high_blood_pressure_history">Hypertension (ever told)</label>
+            <select id="high_blood_pressure_history" name="high_blood_pressure_history">
+              <option value="No" selected>No</option>
+              <option value="Yes">Yes</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="taking_bp_meds">Taking prescribed BP medicine</label>
+            <select id="taking_bp_meds" name="taking_bp_meds">
+              <option value="No" selected>No</option>
+              <option value="Yes">Yes</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="high_cholesterol_diagnosis">High cholesterol (ever told)</label>
+            <select id="high_cholesterol_diagnosis" name="high_cholesterol_diagnosis">
+              <option value="No" selected>No</option>
+              <option value="Yes">Yes</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="diabetes_diagnosis">Diabetes (ever told)</label>
+            <select id="diabetes_diagnosis" name="diabetes_diagnosis">
+              <option value="No" selected>No</option>
+              <option value="Yes">Yes</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="taking_diabetic_pills">Taking diabetic pills</label>
+            <select id="taking_diabetic_pills" name="taking_diabetic_pills">
+              <option value="No" selected>No</option>
+              <option value="Yes">Yes</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="sec-diet">
+          <h2 id="sec-diet">Diet (per day)</h2>
+          <div class="field">
+            <label for="energy_kcal">Energy (kcal)</label>
+            <input type="number" id="energy_kcal" name="energy_kcal" min="0" value="1800">
+          </div>
+          <div class="field">
+            <label for="dietary_fiber_gm">Dietary fiber (g)</label>
+            <input type="number" id="dietary_fiber_gm" name="dietary_fiber_gm" min="0" step="any" value="60">
+          </div>
+          <div class="field">
+            <label for="saturated_fats_gm">Saturated fat (g)</label>
+            <input type="number" id="saturated_fats_gm" name="saturated_fats_gm" min="0" step="any" value="30">
+          </div>
+          <div class="field">
+            <label for="vitamin_c">Vitamin C (mg)</label>
+            <input type="number" id="vitamin_c" name="vitamin_c" min="0" value="80">
+          </div>
+          <div class="field">
+            <label for="alcohol_frequency">Times 4–5+ drinks on one occasion (past 30 days)</label>
+            <input type="number" id="alcohol_frequency" name="alcohol_frequency" min="0" value="0">
+          </div>
+          <div class="field">
+            <label for="on_special_diet">On a special diet?</label>
+            <select id="on_special_diet" name="on_special_diet">
+              <option value="No" selected>No</option>
+              <option value="Yes">Yes</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="diet_type">Diet type</label>
+            <select id="diet_type" name="diet_type">
+              <option value="Don't know" selected>Don't know</option>
+              <option value="Weight loss/Low calorie diet">Weight loss / Low calorie</option>
+              <option value="Low fat/Low cholesterol diet">Low fat / Low cholesterol</option>
+              <option value="Low salt/Low sodium diet">Low salt / Low sodium</option>
+              <option value="Sugar free/Low sugar diet">Sugar free / Low sugar</option>
+              <option value="Low fiber diet">Low fiber</option>
+              <option value="High fiber diet">High fiber</option>
+              <option value="Diabetic diet">Diabetic diet</option>
+              <option value="Weight gain/Muscle building diet">Weight gain / Muscle building</option>
+              <option value="Low carbohydrate diet">Low carbohydrate</option>
+              <option value="High protein diet">High protein</option>
+              <option value="Other special diet">Other special diet</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="sec-mental">
+          <h2 id="sec-mental">Last 2 weeks (mood)</h2>
+          <div class="field">
+            <label for="interest_loss">Little interest or pleasure in doing things</label>
+            <select id="interest_loss" name="interest_loss">
+              <option value="Not at all" selected>Not at all</option>
+              <option value="Several days">Several days</option>
+              <option value="More than half the days">More than half the days</option>
+              <option value="Nearly every day">Nearly every day</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="feeling_depressed">Feeling down, depressed, or hopeless</label>
+            <select id="feeling_depressed" name="feeling_depressed">
+              <option value="Not at all">Not at all</option>
+              <option value="Several days" selected>Several days</option>
+              <option value="More than half the days">More than half the days</option>
+              <option value="Nearly every day">Nearly every day</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="feeling_tired">Feeling tired or little energy</label>
+            <select id="feeling_tired" name="feeling_tired">
+              <option value="Not at all">Not at all</option>
+              <option value="Several days">Several days</option>
+              <option value="More than half the days" selected>More than half the days</option>
+              <option value="Nearly every day">Nearly every day</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="poor_appetite">Poor appetite or overeating</label>
+            <select id="poor_appetite" name="poor_appetite">
+              <option value="Not at all">Not at all</option>
+              <option value="Several days">Several days</option>
+              <option value="More than half the days">More than half the days</option>
+              <option value="Nearly every day" selected>Nearly every day</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="problem_difficulty">Difficulty from these problems (work, home, people)</label>
+            <select id="problem_difficulty" name="problem_difficulty">
+              <option value="Not difficult at all" selected>Not difficult at all</option>
+              <option value="Somewhat difficult">Somewhat difficult</option>
+              <option value="Very difficult">Very difficult</option>
+              <option value="Extremely difficult">Extremely difficult</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="sec-activity">
+          <h2 id="sec-activity">Physical activity</h2>
+          <div class="field">
+            <label for="walk_bicycle">Walk or bicycle ≥10 min to get places (typical week)</label>
+            <select id="walk_bicycle" name="walk_bicycle">
+              <option value="No">No</option>
+              <option value="Yes" selected>Yes</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="vigorous_activities">Vigorous-intensity activities ≥10 min (typical week)</label>
+            <select id="vigorous_activities" name="vigorous_activities">
+              <option value="No">No</option>
+              <option value="Yes" selected>Yes</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="days_vigorous_activities">Days per week vigorous activities</label>
+            <input type="number" id="days_vigorous_activities" name="days_vigorous_activities" min="0" max="7" value="3">
+          </div>
+          <div class="field">
+            <label for="moderate_activities">Moderate-intensity activities ≥10 min (typical week)</label>
+            <select id="moderate_activities" name="moderate_activities">
+              <option value="No">No</option>
+              <option value="Yes" selected>Yes</option>
+              <option value="Don't know">Don't know</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="days_moderate_activities">Days per week moderate activities</label>
+            <input type="number" id="days_moderate_activities" name="days_moderate_activities" min="0" max="7" value="4">
+          </div>
+          <div class="field">
+            <label for="minutes_sedentary">Minutes sitting on a typical day (excl. sleep)</label>
+            <input type="number" id="minutes_sedentary" name="minutes_sedentary" min="0" max="1440" value="300">
+          </div>
+        </section>
+
+        <div class="form-actions">
+          <button type="submit" id="submit-btn">Calculate</button>
+          <button type="reset" id="reset-btn">Reset</button>
+        </div>
+      </form>
+
+      <section id="results" class="results hidden" aria-live="polite">
+        <h2>Results</h2>
+        <div id="results-content"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Health utility explorer — NHANES-based comparison. For research / educational use. Not a substitute for medical advice.</p>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
