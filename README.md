@@ -1,88 +1,194 @@
-# QALY 2024 — NHANES-based population comparator
+## Health utility explorer — NHANES-based population comparator
 
-Local web app (HTML, CSS, JS, YAML) to run the QALY/NHANES-style calculator. You can run it locally and publish the frontend to a GitHub repo.
+Local, explainable **health utility explorer** built on NHANES-style data.
 
-## What’s in this repo
+The app:
 
-- **`web/`** — Frontend
-  - **`index.html`** — Single-page form (demographics, labs, diet, mental health, activity)
-  - **`css/style.css`** — Styles
-  - **`js/app.js`** — Sends form data to `/api/calculate`, shows utility, QALY, warnings, and two charts
-  - **`config.yaml`** — Config (app title, utility bounds, etc.); loaded by the frontend
-- **`server.py`** — Flask app: serves `web/` and `POST /api/calculate` (runs the Python script, returns JSON)
-- **`ver_3_qaly_nhanes_calculation.py`** — Full QALY calculation; callable as `qaly(initial_user_data=..., data_path=...)` for the API
-- **`Cleaned_Dataset_QALY_Diet.csv`** — NHANES-derived dataset (required for the calculator)
-- **`REFACTOR_PLAN.md`** — Refactor and improvement plan for the Python script
+- collects a set of **demographic, lab, diet, mental health, and activity** inputs,
+- compares them to a **NHANES-derived dataset**, and
+- computes a **utility-style health score** and **estimated quality‑adjusted years** (to a benchmark age),
+  with detailed **factor contributions** and **scenario comparisons**.
 
-## Run locally (with real calculation and graphs)
-
-1. Install Python dependencies: `pip install -r requirements.txt`
-2. Start the backend: `python server.py`
-3. Open **http://127.0.0.1:5000** in your browser. Fill the form and click **Calculate**. You get utility score, QALY, warnings, a **contribution breakdown** chart (horizontal bars), and a **scenario comparison** chart (QALY for best/worst/middle scenarios).
-
-<details>
-<summary>Alternative: static-only (no backend)</summary>
-
-### Option 1: Node (npx)
-
-```bash
-cd web
-npx serve .
-```
-
-Then open **http://localhost:3000** (or the URL shown).
-
-### Option 2: Python
-
-```bash
-cd web
-python3 -m http.server 8000
-```
-
-Then open **http://localhost:8000**.
-
-### Option 3: VS Code / Cursor
-
-Use the “Live Server” extension and “Open with Live Server” on `index.html`.
+It is designed for **exploration and education**, not for clinical or reimbursement decisions.
 
 ---
 
-Without the Flask backend, **Calculate** will show an error; run `python server.py` for full results and charts.
+### Key features
 
-## Put the app on GitHub
+- **Single-page web app** (`web/`) with a clean form UI.
+- **Utility score** (0–1) plus **estimated quality‑adjusted years** to a configurable benchmark age.
+- **Contribution breakdown**: which factors raise or lower the utility score (green vs red bars).
+- **Cumulative progression**: how the score evolves as each factor is applied.
+- **Scenario explorer** (best / worst / middle‑case profiles):
+  - Cumulative utility by scenario (multiple lines).
+  - Scenario comparison of contributions (grouped tornado chart).
+- Fully local: **Flask backend + JavaScript frontend**, no external APIs.
 
-1. Create a new repository on GitHub (e.g. `qaly-nhanes-app`).
-2. From the project root (`QALY_2024`):
+---
 
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit: web app + Python ref"
-   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-   git branch -M main
-   git push -u origin main
-   ```
+## Project structure
 
-3. To **publish the web app** with GitHub Pages:
-   - Repo **Settings → Pages**
-   - Source: **Deploy from a branch**
-   - Branch: **main**, folder: **/ (root)** or **/web** depending on where your `index.html` lives.
-   - If you choose root, move `index.html` (and `css/`, `js/`, `config.yaml`) to the repo root, or set the Pages source to **main** and **/web** so the site is served from the `web` folder.
+- **`server.py`**  
+  Flask backend:
+  - serves the static frontend from `web/`
+  - exposes `POST /api/calculate` that runs the calculator and returns JSON
 
-**Note:** GitHub Pages serves static files only. The current app is static; if you add a Python backend later, you’ll need to host it elsewhere (e.g. Railway, Render, or a VPS) and point the frontend to that API.
+- **`qaly_calculator.py`**  
+  Main **calculation engine** used by the web app. This is the file to modify if you change the logic.
 
-## Config (YAML)
+- **`ver_3_qaly_nhanes_calculation.py`**  
+  Original Colab-style script kept as a **reference**. The web app uses `qaly_calculator.py`, not this file.
 
-Edit **`web/config.yaml`** to change:
+- **`Cleaned_Dataset_QALY_Diet.csv`**  
+  NHANES‑derived dataset used by the calculator.  
+  - Required at runtime by `qaly_calculator.py` / `server.py`.  
+  - You may choose **not** to commit this file to GitHub (e.g. add it to `.gitignore`) and instead document how to obtain it.
 
-- `app.title` and `app.subtitle`
-- `utility.min_score`, `max_score`, `benchmark_age`
-- `weights.*` (penalty multipliers)
-- `numeric_boundaries` (healthy/unhealthy ranges for validation or scenarios)
-- `options` (dropdown choices; can be used to build or validate the form)
+- **`web/`** — frontend
+  - **`index.html`** – single-page UI (form + result panels).
+  - **`css/style.css`** – layout and styling.
+  - **`js/app.js`** – loads config, handles form submission, calls `/api/calculate`, renders results and charts.
+  - **`config.yaml`** – app title/subtitle, utility bounds, contribution weights, and options.
 
-The app loads this file when the page loads. After changing YAML, refresh the page.
+- **`REFACTOR_PLAN.md`**  
+  Notes about how the original script was reshaped into a reusable calculator and web backend.
+
+- **`requirements.txt`**  
+  Python dependencies for the backend and calculation.
+
+---
+
+## Installation and setup
+
+### 1. Create / activate a Python environment
+
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+```
+
+### 2. Install dependencies
+
+From the project root (`QALY_2024`):
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Place the dataset
+
+Make sure `Cleaned_Dataset_QALY_Diet.csv` is present in the **project root**, next to `server.py` and `qaly_calculator.py`.
+
+If you do **not** want to commit the dataset to GitHub, add it to `.gitignore` and describe in this README (or your paper/report) how to obtain or regenerate it.
+
+---
+
+## Running the Health utility explorer locally
+
+From the project root:
+
+```bash
+python server.py
+```
+
+Then open:
+
+```text
+http://127.0.0.1:5000
+```
+
+in your browser.
+
+### What you’ll see
+
+1. **Form** with sections:
+   - Demographics
+   - Labs and clinical measures
+   - Diet and nutrients
+   - Mental health and functioning
+   - Physical activity and sedentary time
+
+2. After clicking **Calculate**, the app:
+   - POSTs your inputs to `/api/calculate`.
+   - Shows:
+     - **Utility score** (0–1).
+     - **Remaining years to benchmark age** (e.g. to age 80).
+     - **Estimated quality‑adjusted years**.
+     - Any **notes/warnings** (missing data, caps, etc.).
+
+3. It also renders several charts:
+   - **Utility score contribution breakdown**  
+     Horizontal bars. **Green = raises your score, red = lowers it.**
+   - **Cumulative utility score progression**  
+     How the utility score changes as each factor is applied in sequence.
+   - **Cumulative utility by scenario**  
+     One line per scenario (Best case, Middle cases, Worst case).
+   - **Scenario comparison (contributions)**  
+     Grouped horizontal bars showing how the same parameters behave under each scenario.
+
+If the browser shows “Failed to reach backend” or similar, ensure that:
+
+- `python server.py` is running, and
+- you are opening the app via `http://127.0.0.1:5000` (the Flask server), not via a file URL.
+
+---
+
+## Interpreting the numbers
+
+- **Utility score (0–1)**  
+  - 1.0 ≈ ideal health state (in this model).  
+  - Closer to 0.1 ≈ poorer health state (minimum cap used in the model).
+
+- **Remaining years to benchmark age**  
+  - Calculated as `benchmark_age - current_age` (e.g. up to age 80).
+  - This is **not** a life expectancy prediction; it is just a horizon used to scale quality‑adjusted years.
+
+- **Estimated quality‑adjusted years**  
+  - Roughly `utility_score × remaining_years` using the benchmark age horizon.
+  - Provided for **exploratory comparison only**.
+
+- **Scenarios**  
+  - **Best case**: favorable values drawn from healthier parts of the NHANES‑style distribution.  
+  - **Worst case**: unfavorable values.  
+  - **Middle cases**: intermediate mixes to illustrate sensitivity.
+
+The calculations are driven by `qaly_calculator.py` and are **model‑based**, not clinical guidance.
+
+---
+
+## Configuration (`web/config.yaml`)
+
+You can tune some high‑level behavior without touching Python:
+
+- **`app.title` / `app.subtitle`** – text in the page header.
+- **`utility.min_score` / `max_score` / `benchmark_age`** – clamps and horizon used in the model.
+- **`weights.*`** – multipliers for negative contributions (how strongly to penalize certain risk factors).
+- **`numeric_boundaries`** – approximate “healthy”/“unhealthy” ranges used for validation and scenarios.
+- **`options`** – choices for dropdowns and radios (gender, depression frequency, diet type, etc.).
+
+After editing `config.yaml`, simply refresh the page in your browser.
+
+---
+
+## Development notes
+
+- **Where to change the logic:**  
+  - Use `qaly_calculator.py`. The web app calls `qaly(initial_user_data=..., data_path=...)` from this module.
+  - `ver_3_qaly_nhanes_calculation.py` is kept as a historical reference and is not used by `server.py`.
+
+- **Frontend behavior:**  
+  - `web/js/app.js` loads `config.yaml`, serializes the form, calls `/api/calculate`, and renders:
+    - main numeric results,
+    - warnings,
+    - several Chart.js visualizations.
+
+- **Backend plotting:**  
+  - `server.py` forces a non‑GUI matplotlib backend (`Agg`) so the calculation logic can still generate plots without opening windows (important on macOS / threaded environments).
+
+---
 
 ## License and disclaimer
 
-For research / educational use. Not a substitute for professional medical advice.
+This code is intended for **research and educational use only**.
+
+It is **not** a medical device and **must not** be used to diagnose, treat, or make decisions about individual patients or reimbursement. Always consult qualified health professionals for medical advice.
